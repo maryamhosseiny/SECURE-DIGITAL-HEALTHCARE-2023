@@ -14,12 +14,16 @@ use \App\Http\Controllers\FileController;
 | be assigned to the "web" middleware group. Make something great!
 |
 */
+Route::middleware(['auth'])->group(function () {
 
-Route::get('/', [UserController::class, 'dashboard']);
+    Route::get('/dashboard', [UserController::class, 'dashboard']);
+    Route::get('/patient', [UserController::class, 'patient']);
+    Route::any('/profile', [UserController::class, 'profile']);
+    Route::any('/logout', [UserController::class, 'logout']);
+});
+
+Route::get('/', [UserController::class, 'login']);
+Route::post('/', [UserController::class, 'login']);
 Route::any('/login', [UserController::class, 'login']);
-Route::get('/dashboard', [UserController::class, 'dashboard']);
-Route::any('/profile', [UserController::class, 'profile']);
-Route::any('/logout', [UserController::class, 'logout']);
-
 Route::get('/file/view/{hash}', [FileController::class, 'view']);
 

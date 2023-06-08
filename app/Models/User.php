@@ -42,4 +42,17 @@ class User extends Authenticatable
         'email_verified_at' => 'datetime',
         'password' => 'hashed',
     ];
+
+    function isPatientUser()
+    {
+        $rolePatient = Role::where('slug', Role::SLUG_PATIENT)->first();
+        return $this->role_id == $rolePatient->id;
+    }
+
+    function isDoctorUser()
+    {
+        $roleDoctor = Role::where('slug', Role::SLUG_DOCTOR)->first();
+        return $this->role_id == $roleDoctor->id;
+    }
+
 }

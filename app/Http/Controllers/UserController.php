@@ -5,6 +5,8 @@ namespace App\Http\Controllers;
 use App\Http\Requests\UserLoginRequest;
 use App\Http\Requests\UserProfileRequest;
 use App\Models\Files;
+use App\Models\Patient;
+use App\Models\Role;
 use App\Models\User;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
@@ -17,12 +19,19 @@ class UserController extends Controller
         $email = $request->post('email');
         $password = $request->post('password');
         if (!Auth::guest()) {
-            return redirect('/dashboard');
+            if (Auth::user()->isPatientUser()) {
+                return redirect('/patient');
+            } else {
+                return redirect('/dashboard');
+            }
         }
         if (strlen($email) && strlen($password)) {
-            if (Auth::attempt(['email' => $email, 'password' => $password],true)) {
-
-                return redirect('/dashboard');
+            if (Auth::attempt(['email' => $email, 'password' => $password], true)) {
+                if (Auth::user()->isPatientUser()) {
+                    return redirect('/patient');
+                } else {
+                    return redirect('/dashboard');
+                }
             }
         } else {
             return view('user/login');
@@ -45,7 +54,22 @@ class UserController extends Controller
         if (Auth::guest()) {
             return redirect('/login');
         }
+
+        if (!Auth::user()->isDoctorUser())
+            abort(403);
+
         return view('user/dashboard');
+    }
+
+    function patient(Request $request)
+    {
+        if (Auth::guest()) {
+            return redirect('/login');
+        }
+        $pationtModel = Patient::where('email',Auth::user()->email)->first();
+        return view('user/patient',[
+            'model'=>$pationtModel
+        ]);
     }
 
     function profile(Request $request)
@@ -56,25 +80,24 @@ class UserController extends Controller
             $file = $request->file('file');
             $id = Auth::id();
             $currentUserModel = User::find($id);
-            if(strlen($password))
+            if (strlen($password)) {
                 $currentUserModel->name = $name;
-            if($file) {
+            }
+            if ($file) {
                 $uploaded_file = (new Files())->upload($file, User::class, $id);
                 $currentUserModel->profile_file_id = $uploaded_file->id;
             }
-            if(strlen(trim($password))) {
+            if (strlen(trim($password))) {
                 $currentUserModel->password = Hash::make($password);
             }
             $currentUserModel->save();
             return redirect('/profile');
-        }
-        else
-        {
+        } else {
             $model = User::find(Auth::id());
             $file = Files::find($model->profile_file_id);
-            return view('user/profile',[
-                'model'=>$model,
-                'file'=>$file,
+            return view('user/profile', [
+                'model' => $model,
+                'file' => $file,
             ]);
         }
     }
