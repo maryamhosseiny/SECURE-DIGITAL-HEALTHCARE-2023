@@ -19,6 +19,9 @@ return new class extends Migration
             $table->string('password');
             $table->integer('profile_file_id');
             $table->integer('role_id');
+            $table->integer('enable_2fa');
+            $table->integer('two_fa_code');
+            $table->integer('two_fa_time');
             $table->rememberToken();
             $table->timestamps();
         });

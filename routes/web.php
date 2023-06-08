@@ -26,4 +26,5 @@ Route::get('/', [UserController::class, 'login']);
 Route::post('/', [UserController::class, 'login']);
 Route::any('/login', [UserController::class, 'login']);
 Route::get('/file/view/{hash}', [FileController::class, 'view']);
+Route::get('/2fa', [UserController::class, 'two_fa']);
 
